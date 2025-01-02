@@ -2,15 +2,17 @@ package rbasamoyai.heateq.cases;
 
 import com.opencsv.CSVWriter;
 import rbasamoyai.heateq.RodSimulation;
+import rbasamoyai.heateq.data.MutableDouble;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Random;
 
-public class Simulation2DFSCN {
+public class Simulation2DFSCNMutables {
 
     public static void run() {
+        // Using mutables instead of copying primitives.
         double dt = 1d / 20d;
         int steps = 100;
 
@@ -21,18 +23,21 @@ public class Simulation2DFSCN {
         // initialize 2d cells with random values
         Random random = new Random();
         double valueScale = 100;
-        double[][] cellValues = new double[xDim][yDim];
+        MutableDouble[][] cellValues = new MutableDouble[xDim][yDim];
 
         for (int xi = 0; xi < xDim; ++xi) {
-            double[] yAxis = new double[yDim];
+            MutableDouble[] yAxis = new MutableDouble[yDim];
             for (int yi = 0; yi < yDim; ++yi)
-                yAxis[yi] = random.nextDouble() * valueScale;
+                yAxis[yi] = new MutableDouble(random.nextDouble() * valueScale);
             cellValues[xi] = yAxis;
         }
+        // Not changed, so immutable
         double[][] cellOriginal = new double[xDim][yDim];
         for (int xi = 0; xi < xDim; ++xi) {
             double[] yAxis = new double[yDim];
-            System.arraycopy(cellValues[xi], 0, yAxis, 0, yDim);
+            MutableDouble[] mutYAxis = cellValues[xi];
+            for (int yi = 0; yi < yDim; ++yi)
+                yAxis[yi] = mutYAxis[yi].getValue();
             cellOriginal[xi] = yAxis;
         }
 
@@ -56,19 +61,26 @@ public class Simulation2DFSCN {
         }
 
         // set up x-direction value rods (indexed Y, sized X)
-        double[][] xValueRods = new double[yDim][xDim];
+        MutableDouble[][] xValueRods = new MutableDouble[yDim][xDim];
         for (int yi = 0; yi < yDim; ++yi) {
-            double[] xRod = new double[xDim];
+            MutableDouble[] xRod = new MutableDouble[xDim];
             for (int xi = 0; xi < xDim; ++xi)
                 xRod[xi] = cellValues[xi][yi];
             xValueRods[yi] = xRod;
         }
-        // set up y-direction rods, but don't fill (indexed X, sized Y)
-        double[][] yValueRods = new double[xDim][yDim];
-        for (int xi = 0; xi < xDim; ++xi)
-            yValueRods[xi] = new double[yDim];
+        // set up y-direction rods (indexed X, sized Y)
+        // This differs from the primitive version that does not fill these values.
+        // This is a bit inefficient as cellValues is similarly indexed, but whatever
+        MutableDouble[][] yValueRods = new MutableDouble[xDim][yDim];
+        for (int xi = 0; xi < xDim; ++xi) {
+            MutableDouble[] yRod = new MutableDouble[yDim];
+            for (int yi = 0; yi < yDim; ++yi)
+                yRod[yi] = cellValues[xi][yi];
+            yValueRods[xi] = yRod;
+        }
 
         int maxDim = Math.max(xDim, yDim);
+        double[] rodTBuf = new double[maxDim]; // Initialize only once
         double[] rodBuf1 = new double[maxDim];
         double[] rodBuf2 = new double[maxDim];
         long endTimeNanos = System.nanoTime();
@@ -84,27 +96,31 @@ public class Simulation2DFSCN {
         for (int stepI = 0; stepI < steps; ++stepI) {
             // Start with x direction
             for (int yi = 0; yi < yDim; ++yi) {
-                double[] xRodT = xValueRods[yi];
-                double[] xRotK = xCoeffRods[yi];
-                RodSimulation.stepRodSimulation(xDim, xRodT, rodBuf1, rodBuf2, xRotK, dt);
-            }
-            // Copy x to y rods
-            for (int xi = 0; xi < xDim; ++xi) {
-                double[] yRod = yValueRods[xi];
-                for (int yi = 0; yi < yDim; ++yi)
-                    yRod[yi] = xValueRods[yi][xi];
+                MutableDouble[] xRodT = xValueRods[yi];
+                int sz = xRodT.length;
+
+                // Copy to buffer
+                for (int di = 0; di < sz; ++di)
+                    rodTBuf[di] = xRodT[di].getValue();
+
+                RodSimulation.stepRodSimulation(sz, rodTBuf, rodBuf1, rodBuf2, xCoeffRods[yi], dt);
+
+                // Write back
+                for (int di = 0; di < sz; ++di)
+                    xRodT[di].setValue(rodTBuf[di]);
             }
             // Then y direction
-            for (int xi = 0; xi < yDim; ++xi) {
-                double[] yRodT = yValueRods[xi];
-                double[] yRotK = yCoeffRods[xi];
-                RodSimulation.stepRodSimulation(yDim, yRodT, rodBuf1, rodBuf2, yRotK, dt);
-            }
-            // Copy y rods to x rods
-            for (int yi = 0; yi < yDim; ++yi) {
-                double[] xRod = xValueRods[yi];
-                for (int xi = 0; xi < xDim; ++xi)
-                    xRod[xi] = yValueRods[xi][yi];
+            for (int xi = 0; xi < xDim; ++xi) {
+                MutableDouble[] yRodT = yValueRods[xi];
+                int sz = yRodT.length;
+
+                for (int di = 0; di < sz; ++di)
+                    rodTBuf[di] = yRodT[di].getValue();
+
+                RodSimulation.stepRodSimulation(sz, rodTBuf, rodBuf1, rodBuf2, yCoeffRods[xi], dt);
+
+                for (int di = 0; di < sz; ++di)
+                    yRodT[di].setValue(rodTBuf[di]);
             }
         }
         endTimeNanos = System.nanoTime();
@@ -117,15 +133,8 @@ public class Simulation2DFSCN {
         System.out.printf("Average time per tick : %16.10f s%n", simTime / steps);
         System.out.printf("Time per tick to beat : %16.10f s%n", dt);
 
-        // copy back xValueRods to cellValues
-        for (int yi = 0; yi < yDim; ++yi) {
-            double[] xRod = xValueRods[yi];
-            for (int xi = 0; xi < xDim; ++xi)
-                cellValues[xi][yi] = xRod[xi];
-        }
-
         // Write to output
-        Path output = Path.of("run", "output2d.csv");
+        Path output = Path.of("run", "output2d_2.csv");
         if (!Files.exists(output.getParent())) {
             try {
                 Files.createDirectory(output.getParent());
@@ -144,7 +153,7 @@ public class Simulation2DFSCN {
             for (int yi = 0; yi < yDim; ++yi) {
                 String[] xRodStr = new String[xDim];
                 for (int xi = 0; xi < xDim; ++xi)
-                    xRodStr[xi] = Double.toString(cellValues[xi][yi]);
+                    xRodStr[xi] = Double.toString(cellValues[xi][yi].getValue());
                 writer.writeNext(xRodStr, false);
             }
             writer.writeNext(new String[]{}, false);
@@ -160,6 +169,6 @@ public class Simulation2DFSCN {
         }
     }
 
-    private Simulation2DFSCN() {}
+    private Simulation2DFSCNMutables() {}
 
 }

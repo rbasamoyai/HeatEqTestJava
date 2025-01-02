@@ -29,7 +29,7 @@ public class Simulation1DCN {
 
         long startNanos = System.nanoTime();
         for (int stepIdx = 0; stepIdx < steps; ++stepIdx)
-            RodSimulation.stepRodSimulation(rodT, rodResult, impScratch, rodK, dt);
+            RodSimulation.stepRodSimulation(length, rodT, rodResult, impScratch, rodK, dt);
         long endNanos = System.nanoTime();
 
         long simTimeNanos = endNanos - startNanos;

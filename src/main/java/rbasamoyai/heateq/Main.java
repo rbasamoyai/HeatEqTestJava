@@ -2,19 +2,23 @@ package rbasamoyai.heateq;
 
 import rbasamoyai.heateq.cases.Simulation1DCN;
 import rbasamoyai.heateq.cases.Simulation2DFSCN;
+import rbasamoyai.heateq.cases.Simulation2DFSCNMutables;
 
 public class Main {
 
     public static void main(String[] args) {
         RodSimulation.init(); // Just to avoid skewing the timer from classloading
 
-        System.out.println("1D rod Crank-Nicolson");
+        System.out.println("1D Crank-Nicolson");
         Simulation1DCN.run();
 
         System.out.println();
-
-        System.out.println("2D rod fractional steps Crank-Nicolson");
+        System.out.println("2D fractional steps Crank-Nicolson using primitive variables");
         Simulation2DFSCN.run();
+
+        System.out.println();
+        System.out.println("2D fractional steps Crank-Nicolson using mutable variables");
+        Simulation2DFSCNMutables.run();
     }
 
 }

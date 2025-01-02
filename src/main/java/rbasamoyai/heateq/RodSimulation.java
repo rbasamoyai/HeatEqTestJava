@@ -4,16 +4,15 @@ public class RodSimulation {
 
     public static void init() {}
 
-    public static void stepRodSimulation(double[] rodT, double[] buf1, double[] buf2, double[] rodK, double dt) {
+    public static void stepRodSimulation(int sz, double[] rodT, double[] buf1, double[] buf2, double[] rodK, double dt) {
         // Adapted from Cen, Hoppe, and Gu (2016)
         // Read more: https://pubs.aip.org/aip/adv/article/6/9/095305/882010/Fast-and-accurate-determination-of-3D-temperature
 
+        // sz is the size of the rod to analyze. No length checks are done for faster performance.
         // rodT is the starting rod T(t=0)
         // buf1 is the buffer for both the explicit and implicit phases and writes back to rod_t
         // buf2 stores the modified superdiagonal values for the matrix calculations in the implicit step
         // rodK is a precomputed constants rod
-
-        int sz = rodT.length;
 
         // explicit step
         buf1[0] = rodT[0] + (-2 * rodT[0] + rodT[1]) * rodK[0];
