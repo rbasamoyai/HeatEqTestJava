@@ -41,7 +41,8 @@ public class RodSimulation {
             buf1[i] -= buf2[i] * buf1[i + 1];
 
         // Copy to rodT
-        System.arraycopy(buf1, 0, rodT, 0, sz);
+        for (int i = 0; i < sz; ++i)
+            rodT[i] = buf1[i];
     }
 
     private RodSimulation() {}

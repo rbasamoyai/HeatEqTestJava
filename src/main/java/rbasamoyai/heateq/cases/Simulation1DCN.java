@@ -12,7 +12,7 @@ public class Simulation1DCN {
 
     public static void run() {
         double dt = 1d / 20d;
-        int steps = 100;
+        int steps = 1000;
 
         int length = 21;
         double[] xes = NumGenUtils.createArrayFromRange(length, x -> (double) x);
@@ -33,13 +33,13 @@ public class Simulation1DCN {
         long endNanos = System.nanoTime();
 
         long simTimeNanos = endNanos - startNanos;
-        double simTime = simTimeNanos * 1e-9d;
+        double simTimeMillis = simTimeNanos * 1e-6d;
 
         System.out.println();
-        System.out.printf("Simulation time       : %16.10f s%n", simTime);
-        System.out.printf("Simulated time        : %16.10f s%n", dt * steps);
-        System.out.printf("Average time per tick : %16.10f s%n", simTime / steps);
-        System.out.printf("Time per tick to beat : %16.10f s%n", dt);
+        System.out.printf("Simulation time       : %12.8f ms%n", simTimeMillis);
+        System.out.printf("Simulated time        : %12.8f s%n", dt * steps);
+        System.out.printf("Average time per tick : %12.8f ms%n", simTimeMillis / steps);
+        System.out.printf("Time per tick to beat : %12.8f ms%n", dt * 1000);
 
         // Write to output
         Path output = Path.of("run", "output1d.csv");
