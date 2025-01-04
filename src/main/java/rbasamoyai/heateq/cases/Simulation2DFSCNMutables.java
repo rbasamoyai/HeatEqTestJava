@@ -14,7 +14,7 @@ public class Simulation2DFSCNMutables {
     public static void run() {
         // Using mutables instead of copying primitives.
         double dt = 1d / 20d;
-        int steps = 100;
+        int steps = 1000;
 
         int xDim = 20;
         int yDim = 20;
@@ -26,19 +26,17 @@ public class Simulation2DFSCNMutables {
         MutableDouble[][] cellValues = new MutableDouble[xDim][yDim];
 
         for (int xi = 0; xi < xDim; ++xi) {
-            MutableDouble[] yAxis = new MutableDouble[yDim];
+            MutableDouble[] yAxis = cellValues[xi];
             for (int yi = 0; yi < yDim; ++yi)
                 yAxis[yi] = new MutableDouble(random.nextDouble() * valueScale);
-            cellValues[xi] = yAxis;
         }
         // Not changed, so immutable
         double[][] cellOriginal = new double[xDim][yDim];
         for (int xi = 0; xi < xDim; ++xi) {
-            double[] yAxis = new double[yDim];
+            double[] yAxis = cellOriginal[xi];
             MutableDouble[] mutYAxis = cellValues[xi];
             for (int yi = 0; yi < yDim; ++yi)
                 yAxis[yi] = mutYAxis[yi].getValue();
-            cellOriginal[xi] = yAxis;
         }
 
         double diffScale = 10;
@@ -47,36 +45,32 @@ public class Simulation2DFSCNMutables {
 
         // set up y-direction coefficient rods (indexed X, sized Y)
         for (int xi = 0; xi < xDim; ++xi) {
-            double[] yRod = new double[yDim];
+            double[] yRod = yCoeffRods[xi];
             for (int yi = 0; yi < yDim; ++yi)
                 yRod[yi] = random.nextDouble() * diffScale * dt * 0.5;
-            yCoeffRods[xi] = yRod;
         }
         // set up x-direction coefficient rods (indexed Y, sized X) by copying from y-direction coefficient rods
         for (int yi = 0; yi < yDim; ++yi) {
-            double[] xRod = new double[xDim];
+            double[] xRod = xCoeffRods[yi];
             for (int xi = 0; xi < xDim; ++xi)
                 xRod[xi] = yCoeffRods[xi][yi];
-            xCoeffRods[yi] = xRod;
         }
 
         // set up x-direction value rods (indexed Y, sized X)
         MutableDouble[][] xValueRods = new MutableDouble[yDim][xDim];
         for (int yi = 0; yi < yDim; ++yi) {
-            MutableDouble[] xRod = new MutableDouble[xDim];
+            MutableDouble[] xRod = xValueRods[yi];
             for (int xi = 0; xi < xDim; ++xi)
                 xRod[xi] = cellValues[xi][yi];
-            xValueRods[yi] = xRod;
         }
         // set up y-direction rods (indexed X, sized Y)
         // This differs from the primitive version that does not fill these values.
         // This is a bit inefficient as cellValues is similarly indexed, but whatever
         MutableDouble[][] yValueRods = new MutableDouble[xDim][yDim];
         for (int xi = 0; xi < xDim; ++xi) {
-            MutableDouble[] yRod = new MutableDouble[yDim];
+            MutableDouble[] yRod = yValueRods[xi];
             for (int yi = 0; yi < yDim; ++yi)
                 yRod[yi] = cellValues[xi][yi];
-            yValueRods[xi] = yRod;
         }
 
         int maxDim = Math.max(xDim, yDim);

@@ -12,7 +12,7 @@ public class Simulation2DFSCN {
 
     public static void run() {
         double dt = 1d / 20d;
-        int steps = 100;
+        int steps = 1000;
 
         int xDim = 20;
         int yDim = 20;
@@ -24,49 +24,44 @@ public class Simulation2DFSCN {
         double[][] cellValues = new double[xDim][yDim];
 
         for (int xi = 0; xi < xDim; ++xi) {
-            double[] yAxis = new double[yDim];
+            double[] yAxis = cellValues[xi];
             for (int yi = 0; yi < yDim; ++yi)
                 yAxis[yi] = random.nextDouble() * valueScale;
-            cellValues[xi] = yAxis;
         }
         double[][] cellOriginal = new double[xDim][yDim];
         for (int xi = 0; xi < xDim; ++xi) {
-            double[] yAxis = new double[yDim];
-            System.arraycopy(cellValues[xi], 0, yAxis, 0, yDim);
-            cellOriginal[xi] = yAxis;
+            double[] yAxis = cellOriginal[xi];
+            double[] yAxisSrc = cellValues[xi];
+            for (int yi = 0; yi < yDim; ++yi)
+                yAxis[yi] = yAxisSrc[yi];
         }
 
-        double diffScale = 10;
+        double diffScale = 80;
         double[][] yCoeffRods = new double[xDim][yDim];
         double[][] xCoeffRods = new double[yDim][xDim];
 
         // set up y-direction coefficient rods (indexed X, sized Y)
         for (int xi = 0; xi < xDim; ++xi) {
-            double[] yRod = new double[yDim];
+            double[] yRod = yCoeffRods[xi];
             for (int yi = 0; yi < yDim; ++yi)
                 yRod[yi] = random.nextDouble() * diffScale * dt * 0.5;
-            yCoeffRods[xi] = yRod;
         }
         // set up x-direction coefficient rods (indexed Y, sized X) by copying from y-direction coefficient rods
         for (int yi = 0; yi < yDim; ++yi) {
-            double[] xRod = new double[xDim];
+            double[] xRod = xCoeffRods[yi];
             for (int xi = 0; xi < xDim; ++xi)
                 xRod[xi] = yCoeffRods[xi][yi];
-            xCoeffRods[yi] = xRod;
         }
 
         // set up x-direction value rods (indexed Y, sized X)
         double[][] xValueRods = new double[yDim][xDim];
         for (int yi = 0; yi < yDim; ++yi) {
-            double[] xRod = new double[xDim];
+            double[] xRod = xValueRods[yi];
             for (int xi = 0; xi < xDim; ++xi)
                 xRod[xi] = cellValues[xi][yi];
-            xValueRods[yi] = xRod;
         }
         // set up y-direction rods, but don't fill (indexed X, sized Y)
         double[][] yValueRods = new double[xDim][yDim];
-        for (int xi = 0; xi < xDim; ++xi)
-            yValueRods[xi] = new double[yDim];
 
         int maxDim = Math.max(xDim, yDim);
         double[] rodBuf1 = new double[maxDim];
@@ -85,8 +80,8 @@ public class Simulation2DFSCN {
             // Start with x direction
             for (int yi = 0; yi < yDim; ++yi) {
                 double[] xRodT = xValueRods[yi];
-                double[] xRotK = xCoeffRods[yi];
-                RodSimulation.stepRodSimulation(xDim, xRodT, rodBuf1, rodBuf2, xRotK, dt);
+                double[] xRodK = xCoeffRods[yi];
+                RodSimulation.stepRodSimulation(xDim, xRodT, rodBuf1, rodBuf2, xRodK, dt);
             }
             // Copy x to y rods
             for (int xi = 0; xi < xDim; ++xi) {
