@@ -109,7 +109,7 @@ public class Simulation3DFSCN {
                 for (int zi = 0; zi < zDim; ++zi) {
                     double[] xRodT = zxSliceT[zi];
                     double[] xRodK = zxSliceK[zi];
-                    RodSimulation.stepRodSimulation(xDim, xRodT, rodBuf1, rodBuf2, xRodK, dt);
+                    RodSimulation.stepRodSimulation(xDim, xRodT, rodBuf1, rodBuf2, xRodK, dt, 0, 0);
                 }
             }
             // Copy x to y rods
@@ -128,7 +128,7 @@ public class Simulation3DFSCN {
                 for (int zi = 0; zi < zDim; ++zi) {
                     double[] yRodT = zySliceT[zi];
                     double[] yRodK = zySliceK[zi];
-                    RodSimulation.stepRodSimulation(yDim, yRodT, rodBuf1, rodBuf2, yRodK, dt);
+                    RodSimulation.stepRodSimulation(yDim, yRodT, rodBuf1, rodBuf2, yRodK, dt, 0, 0);
                 }
             }
             // Copy y to z rods
@@ -147,7 +147,7 @@ public class Simulation3DFSCN {
                 for (int yi = 0; yi < yDim; ++yi) {
                     double[] zRodT = yzSliceT[yi];
                     double[] zRodK = yzSliceK[yi];
-                    RodSimulation.stepRodSimulation(zDim, zRodT, rodBuf1, rodBuf2, zRodK, dt);
+                    RodSimulation.stepRodSimulation(zDim, zRodT, rodBuf1, rodBuf2, zRodK, dt, 0, 0);
                 }
             }
             // Copy z to x

@@ -81,7 +81,7 @@ public class Simulation2DFSCN {
             for (int yi = 0; yi < yDim; ++yi) {
                 double[] xRodT = xValueRods[yi];
                 double[] xRodK = xCoeffRods[yi];
-                RodSimulation.stepRodSimulation(xDim, xRodT, rodBuf1, rodBuf2, xRodK, dt);
+                RodSimulation.stepRodSimulation(xDim, xRodT, rodBuf1, rodBuf2, xRodK, dt, 0, 0);
             }
             // Copy x to y rods
             for (int xi = 0; xi < xDim; ++xi) {
@@ -93,7 +93,7 @@ public class Simulation2DFSCN {
             for (int xi = 0; xi < yDim; ++xi) {
                 double[] yRodT = yValueRods[xi];
                 double[] yRotK = yCoeffRods[xi];
-                RodSimulation.stepRodSimulation(yDim, yRodT, rodBuf1, rodBuf2, yRotK, dt);
+                RodSimulation.stepRodSimulation(yDim, yRodT, rodBuf1, rodBuf2, yRotK, dt, 0, 0);
             }
             // Copy y rods to x rods
             for (int yi = 0; yi < yDim; ++yi) {

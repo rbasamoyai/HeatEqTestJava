@@ -97,7 +97,7 @@ public class Simulation2DFSCNMutables {
                 for (int di = 0; di < sz; ++di)
                     rodTBuf[di] = xRodT[di].getValue();
 
-                RodSimulation.stepRodSimulation(sz, rodTBuf, rodBuf1, rodBuf2, xCoeffRods[yi], dt);
+                RodSimulation.stepRodSimulation(sz, rodTBuf, rodBuf1, rodBuf2, xCoeffRods[yi], dt, 0, 0);
 
                 // Write back
                 for (int di = 0; di < sz; ++di)
@@ -111,7 +111,7 @@ public class Simulation2DFSCNMutables {
                 for (int di = 0; di < sz; ++di)
                     rodTBuf[di] = yRodT[di].getValue();
 
-                RodSimulation.stepRodSimulation(sz, rodTBuf, rodBuf1, rodBuf2, yCoeffRods[xi], dt);
+                RodSimulation.stepRodSimulation(sz, rodTBuf, rodBuf1, rodBuf2, yCoeffRods[xi], dt, 0, 0);
 
                 for (int di = 0; di < sz; ++di)
                     yRodT[di].setValue(rodTBuf[di]);
