@@ -23,7 +23,7 @@ public class RodSimulation {
 
         // implicit step - Thomas' algorithm
         // Adapted from: https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm#Method
-        buf2[0] = rodK[0] / (1 + 2 * rodK[0]);
+        buf2[0] = -rodK[0] / (1 + 2 * rodK[0]);
         buf1[0] = buf1[0] / (1 + 2 * rodK[0]);
 
         for (int i = 1; i < sz - 1; ++i) {
