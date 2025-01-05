@@ -111,6 +111,7 @@ public class Simulation2DFSCN {
         System.out.printf("Simulated time        : %12.8f s%n", dt * steps);
         System.out.printf("Average time per tick : %12.8f ms%n", simTimeMillis / steps);
         System.out.printf("Time per tick to beat : %12.8f ms%n", dt * 1000);
+        System.out.printf("Percent of tick time  : %7.3f%%%n", simTimeMillis / 1000 / dt);
 
         // copy back xValueRods to cellValues
         for (int yi = 0; yi < yDim; ++yi) {
